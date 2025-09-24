@@ -7,8 +7,7 @@ export class FinanceApp {
         console.log('💰 FinanceApp создан!');
         this.apiClient = new ApiClient();
         this.uiManager = new UIManager();
-        this.currentTheme = localStorage.getItem('theme') || 'light';
-        this.applyTheme(this.currentTheme);
+        this.currentTransactions = [];
         this.init();
     }
 
@@ -19,15 +18,6 @@ export class FinanceApp {
     }
 
     setupEventListeners() {
-        // Переключатель темы
-        const themeToggle = document.getElementById('themeToggle');
-        if (themeToggle) {
-            themeToggle.addEventListener('click', () => {
-                this.toggleTheme();
-            });
-            console.log('✅ Переключатель темы настроен');
-        }
-
         // Форма добавления транзакции
         const form = document.getElementById('transactionForm');
         if (form) {
@@ -64,23 +54,6 @@ export class FinanceApp {
         console.log('✅ Фильтры настроены');
     }
 
-    applyTheme(theme) {
-        document.documentElement.setAttribute('data-bs-theme', theme);
-        const icon = document.getElementById('themeIcon');
-        if (icon) {
-            icon.className = theme === 'dark' ? 'bi bi-moon-fill' : 'bi bi-sun-fill';
-        }
-        localStorage.setItem('theme', theme);
-        this.currentTheme = theme;
-        console.log('🎨 Тема применена:', theme);
-    }
-
-    toggleTheme() {
-        const newTheme = this.currentTheme === 'dark' ? 'light' : 'dark';
-        this.applyTheme(newTheme);
-        console.log('🎨 Тема изменена на:', newTheme);
-    }
-
     async loadTransactions() {
         try {
             console.log('📡 Загружаем транзакции...');
@@ -113,13 +86,9 @@ export class FinanceApp {
                 description
             });
 
-            // Обрабатываем и текст, и JSON ответы
             const message = typeof result === 'string' ? result : (result.message || 'Транзакция добавлена!');
-
             document.getElementById('transactionForm').reset();
             this.uiManager.showAlert(message, 'success');
-
-            // Перезагружаем список транзакций
             await this.loadTransactions();
         } catch (error) {
             console.error('Ошибка добавления транзакции:', error);
@@ -135,10 +104,7 @@ export class FinanceApp {
     async confirmReset() {
         try {
             const result = await this.apiClient.resetTransactions();
-
-            // Обрабатываем и текст, и JSON ответы
             const message = typeof result === 'string' ? result : (result.message || 'Транзакции сброшены!');
-
             this.uiManager.hideResetModal();
             this.uiManager.showAlert(message, 'success');
             await this.loadTransactions();
@@ -150,6 +116,7 @@ export class FinanceApp {
 
     handleFilter(filter) {
         console.log('🔍 Фильтр изменён на:', filter);
+
         document.querySelectorAll('[data-filter]').forEach(btn => {
             btn.classList.remove('active');
             if (btn.dataset.filter === filter) {
@@ -157,14 +124,27 @@ export class FinanceApp {
             }
         });
 
-        this.loadTransactions();
+        this.applyFilter(filter);
+    }
+
+    applyFilter(filter) {
+        let filteredTransactions = this.currentTransactions;
+
+        if (filter !== 'all') {
+            filteredTransactions = this.currentTransactions.filter(tx => tx.type === filter);
+        }
+
+        this.uiManager.displayTransactions(filteredTransactions);
+        this.uiManager.updateBalance(filteredTransactions);
+        this.uiManager.updateTransactionsCount(filteredTransactions.length);
     }
 
     updateUI(transactions) {
         console.log('🔄 Обновляем интерфейс, транзакций:', transactions.length);
-        this.uiManager.displayTransactions(transactions);
-        this.uiManager.updateBalance(transactions);
-        this.uiManager.updateTransactionsCount(transactions.length);
+        this.currentTransactions = transactions;
+
+        const activeFilter = document.querySelector('[data-filter].active')?.dataset.filter || 'all';
+        this.applyFilter(activeFilter);
         this.uiManager.updateLastUpdateTime();
     }
 }
