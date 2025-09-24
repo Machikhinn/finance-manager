@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ru" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💰 Финансовый менеджер</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
+</head>
+<body>
+<!-- Навбар -->
+<nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+            <i class="bi bi-wallet2 me-2"></i>💰 Финансовый менеджер
+        </a>
+
+        <div class="d-flex align-items-center">
+            <div class="theme-switch me-3" id="themeToggle" title="Сменить тему">
+                <i class="bi bi-sun-fill" id="themeIcon"></i>
+            </div>
+
+            <button class="btn btn-outline-danger btn-sm" id="resetButton" title="Сбросить все транзакции">
+                <i class="bi bi-trash3"></i> Сбросить всё
+            </button>
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <!-- Блок с балансом -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-body text-center">
+            <h3 class="mb-0">Текущий баланс: <span id="balance" class="balance-positive">0 руб.</span></h3>
+            <small class="text-muted">Обновлено: <span id="lastUpdate">только что</span></small>
+        </div>
+    </div>
+
+    <!-- Форма добавления транзакции -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-plus-circle me-2"></i>Добавить транзакцию</h5>
+            <span class="badge bg-primary" id="transactionsCount">0 транзакций</span>
+        </div>
+        <div class="card-body">
+            <form id="transactionForm">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Тип:</label>
+                        <select class="form-select" id="type" required>
+                            <option value="INCOME">📈 Доход</option>
+                            <option value="EXPENSE">📉 Расход</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Сумма:</label>
+                        <input type="number" class="form-control" id="amount" step="0.01" min="0.01" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Категория:</label>
+                        <input type="text" class="form-control" id="category" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Описание:</label>
+                        <input type="text" class="form-control" id="description" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-success mt-3">
+                    <i class="bi bi-check-lg me-2"></i>Добавить транзакцию
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Список транзакций -->
+    <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0"><i class="bi bi-list-ul me-2"></i>История транзакций</h5>
+            <div class="btn-group btn-group-sm">
+                <button class="btn btn-outline-primary active" data-filter="all">Все</button>
+                <button class="btn btn-outline-success" data-filter="INCOME">Доходы</button>
+                <button class="btn btn-outline-danger" data-filter="EXPENSE">Расходы</button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div id="transactionsList" class="table-responsive">
+                <p class="text-muted text-center">Загрузка транзакций...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно подтверждения сброса -->
+<div class="modal fade" id="resetModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">⚠️ Подтверждение сброса</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Вы уверены, что хотите удалить <strong>все транзакции</strong>?</p>
+                <p class="text-danger"><small>Это действие нельзя отменить!</small></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                <button type="button" class="btn btn-danger" id="confirmReset">Да, сбросить всё</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script type="module" src="/js/app.js"></script>
+</body>
+</html>
